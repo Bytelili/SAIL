@@ -1,4 +1,4 @@
-"""Structured bounded evidence precision from the complete CUSP evidence tuple."""
+"""Structured bounded evidence precision from the complete SAIL evidence tuple."""
 
 from __future__ import annotations
 

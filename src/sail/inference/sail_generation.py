@@ -1,4 +1,4 @@
-"""Greedy autoregressive CUSP decoding with per-step personalized residuals."""
+"""Greedy autoregressive SAIL decoding with per-step personalized residuals."""
 
 from __future__ import annotations
 
@@ -8,9 +8,9 @@ from dataclasses import dataclass
 import torch
 from torch import Tensor
 
-from cusp.models.cusp_model import CUSPModel
-from cusp.models.representation_pooling import pool_last_non_padding_token
-from cusp.models.posterior import PosteriorState
+from sail.models.sail_model import SAILModel
+from sail.models.representation_pooling import pool_last_non_padding_token
+from sail.models.posterior import PosteriorState
 
 
 @dataclass(frozen=True)
@@ -22,7 +22,7 @@ class CachedPosteriorMemory:
 
 
 @dataclass(frozen=True)
-class CUSPGenerationOutput:
+class SAILGenerationOutput:
     """Generated tokens plus compact, CPU-resident personalization diagnostics."""
 
     tokens: Tensor
@@ -37,7 +37,7 @@ class CUSPGenerationOutput:
 
 
 class PosteriorRuntimeCache:
-    """In-memory cache keyed by (user_id, S, CUSP checkpoint hash)."""
+    """In-memory cache keyed by (user_id, S, SAIL checkpoint hash)."""
 
     def __init__(self) -> None:
         self._values: dict[tuple[object, ...], CachedPosteriorMemory] = {}
@@ -63,7 +63,7 @@ class PosteriorRuntimeCache:
 
 
 def compute_posterior_memory(
-    model: CUSPModel,
+    model: SAILModel,
     support_context_hidden: Tensor,
     support_observed_hidden: Tensor,
     support_mask: Tensor,
@@ -132,8 +132,8 @@ def compute_posterior_memory(
     )
 
 
-def cusp_greedy_generate(
-    model: CUSPModel,
+def sail_greedy_generate(
+    model: SAILModel,
     input_ids: Tensor,
     attention_mask: Tensor,
     support_context_hidden: Tensor,
@@ -150,12 +150,12 @@ def cusp_greedy_generate(
     cached_posterior_memory: CachedPosteriorMemory | None = None,
     query_model_inputs: dict[str, Tensor] | None = None,
     return_diagnostics: bool = False,
-) -> Tensor | CUSPGenerationOutput:
-    """Decode CUSP greedily; sampling and beam search are intentionally unsupported."""
+) -> Tensor | SAILGenerationOutput:
+    """Decode SAIL greedily; sampling and beam search are intentionally unsupported."""
     if do_sample:
-        raise ValueError("CUSP generation does not support sampling")
+        raise ValueError("SAIL generation does not support sampling")
     if num_beams != 1:
-        raise ValueError("CUSP generation does not support beam search")
+        raise ValueError("SAIL generation does not support beam search")
     if max_new_tokens <= 0:
         raise ValueError("max_new_tokens must be positive")
     model.eval()
@@ -299,7 +299,7 @@ def cusp_greedy_generate(
         tokens = torch.stack(generated, dim=1)
         if not return_diagnostics:
             return tokens
-        return CUSPGenerationOutput(
+        return SAILGenerationOutput(
             tokens=tokens,
             gate_alpha=gate.alpha.detach().float().cpu(),
             information_confidence=(

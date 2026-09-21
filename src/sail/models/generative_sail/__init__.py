@@ -1,13 +1,13 @@
-"""Candidate-free, autoregressive CUSP experiment line."""
+"""Candidate-free autoregressive SAIL model."""
 
 from .contract import (
     FORBIDDEN_INTENT_CANDIDATE_KEYS,
     assert_candidate_free_batch,
 )
-from .model import GenerativeCUSPModel
+from .model import GenerativeSAILModel
 
 __all__ = [
     "FORBIDDEN_INTENT_CANDIDATE_KEYS",
-    "GenerativeCUSPModel",
+    "GenerativeSAILModel",
     "assert_candidate_free_batch",
 ]

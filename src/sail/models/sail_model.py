@@ -1,4 +1,4 @@
-"""Complete differentiable CUSP forward graph over a frozen Population Model."""
+"""Complete differentiable SAIL forward graph over a frozen Population Model."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor, nn
 
-from cusp.training.losses import (
+from sail.training.losses import (
     GatheredTargets,
     diagonal_gaussian_kl,
     directional_target_margin_loss,
@@ -44,8 +44,8 @@ class EvidenceOutput:
 
 
 @dataclass
-class CUSPOutput:
-    """Losses and diagnostics from a target-position CUSP forward pass."""
+class SAILOutput:
+    """Losses and diagnostics from a target-position SAIL forward pass."""
 
     loss: Tensor
     query_loss: Tensor
@@ -70,7 +70,7 @@ class CUSPOutput:
     harmful_flip_rate: Tensor
 
 
-class CUSPModel(nn.Module):
+class SAILModel(nn.Module):
     """Counterfactual User-State Posterior Memory with frozen population logits."""
 
     def __init__(
@@ -112,7 +112,7 @@ class CUSPModel(nn.Module):
         dimension_gate_mode: str = "learned",
     ) -> None:
         super().__init__()
-        population_model.freeze_for_cusp()
+        population_model.freeze_for_sail()
         self.population_model = population_model
         hidden_size = population_model.hidden_size
         self.residual_evidence = ResidualEvidenceEncoder(hidden_size, latent_dim)
@@ -213,7 +213,7 @@ class CUSPModel(nn.Module):
             )
         self.population_reference_mode = population_reference_mode
         self.precision_feature_mode = precision_feature_mode
-        # The public constructor defaults to the paper's canonical execution
+        # Constructor defaults select the canonical SAIL execution
         # graph.  Alternative modules remain available for inspecting the
         # ablations, but inactive alternatives are not counted as trainable
         # parameters in the selected graph.
@@ -247,13 +247,13 @@ class CUSPModel(nn.Module):
         """Positive, small-at-initialization residual scale."""
         return F.softplus(self.residual_scale_raw)
 
-    def train(self, mode: bool = True) -> "CUSPModel":
-        """Keep the frozen population path in eval mode while training CUSP modules."""
+    def train(self, mode: bool = True) -> "SAILModel":
+        """Keep the frozen population path in eval mode while training SAIL modules."""
         super().train(mode)
         self.population_model.eval()
         return self
 
-    def move_cusp_modules(self, device: torch.device | str) -> None:
+    def move_sail_modules(self, device: torch.device | str) -> None:
         """Move only external trainable modules, preserving Population device_map."""
         for module in (
             self.residual_evidence,
@@ -301,7 +301,7 @@ class CUSPModel(nn.Module):
         memory: Tensor,
         query_context: Tensor,
     ) -> tuple[Tensor, Tensor]:
-        """Apply the paper's query-conditioned gate over memory dimensions."""
+        """Apply the query-conditioned gate over memory dimensions."""
         if self.memory_dimension_gate is None:
             gate = torch.ones_like(memory, dtype=torch.float32)
             return memory, gate
@@ -337,7 +337,7 @@ class CUSPModel(nn.Module):
         support_population_candidate_mask: Tensor | None = None,
         negative_support: dict[str, Tensor] | None = None,
         query_model_inputs: dict[str, Tensor] | None = None,
-    ) -> CUSPOutput:
+    ) -> SAILOutput:
         """Run evidence, posterior, memory, gated target logits, and all losses."""
         population_reference = support_context_hidden
         has_any_support = bool(torch.any(support_mask))
@@ -585,8 +585,8 @@ class CUSPModel(nn.Module):
             / base_correct.float().sum().clamp_min(1.0)
         )
         if not torch.isfinite(loss):
-            raise FloatingPointError("CUSP loss became NaN or Inf")
-        return CUSPOutput(
+            raise FloatingPointError("SAIL loss became NaN or Inf")
+        return SAILOutput(
             loss=loss,
             query_loss=query_loss,
             kl_loss=kl_loss,

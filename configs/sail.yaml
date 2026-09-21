@@ -1,11 +1,4 @@
-release:
-  scope: paper_core
-  exact_experiment_recipe_included: false
-  evaluation_code_included: false
-  runnable_training_entrypoint_included: false
-  runnable_evaluation_entrypoint_included: false
-
-canonical_method_defaults:
+model_defaults:
   latent_dim: 256
   memory_dim: 256
   residual_rank: 256
@@ -30,9 +23,3 @@ model_interface:
   population_candidates: precomputed_tensor_interface
   final_generation: direct_autoregressive
   final_reranking: false
-
-privacy:
-  datasets_included: false
-  checkpoints_included: false
-  machine_paths_included: false
-  unpublished_candidate_heuristics_included: false

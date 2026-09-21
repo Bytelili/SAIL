@@ -1,4 +1,4 @@
-"""Explicit candidate-free facade over the direct-logit CUSP model."""
+"""Explicit candidate-free facade over the direct-logit SAIL model."""
 
 from __future__ import annotations
 
@@ -6,13 +6,13 @@ from typing import Any
 
 from torch import Tensor
 
-from cusp.models.cusp_model import CUSPModel, CUSPOutput
+from sail.models.sail_model import SAILModel, SAILOutput
 
 from .contract import assert_candidate_free_batch
 
 
-class GenerativeCUSPModel(CUSPModel):
-    """CUSP that personalizes vocabulary logits and generates autoregressively.
+class GenerativeSAILModel(SAILModel):
+    """SAIL that personalizes vocabulary logits and generates autoregressively.
 
     The Population model remains frozen.  Historical interactions produce
     counterfactual residual evidence, the evidence forms a user posterior, and
@@ -36,11 +36,11 @@ class GenerativeCUSPModel(CUSPModel):
         support_population_candidate_mask: Tensor | None = None,
         negative_support: dict[str, Tensor] | None = None,
         **unexpected: Any,
-    ) -> CUSPOutput:
+    ) -> SAILOutput:
         assert_candidate_free_batch(unexpected)
         if unexpected:
             raise TypeError(
-                "Unexpected Generative CUSP inputs: "
+                "Unexpected Generative SAIL inputs: "
                 + ", ".join(sorted(unexpected))
             )
         return super().forward(

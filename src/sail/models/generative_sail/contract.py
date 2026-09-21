@@ -1,4 +1,4 @@
-"""Runtime contract for the candidate-free Generative CUSP line."""
+"""Runtime contract for the candidate-free Generative SAIL line."""
 
 from __future__ import annotations
 
@@ -23,6 +23,6 @@ def assert_candidate_free_batch(batch: Mapping[str, Any]) -> None:
     forbidden = sorted(FORBIDDEN_INTENT_CANDIDATE_KEYS.intersection(batch))
     if forbidden:
         raise ValueError(
-            "Generative CUSP does not accept intent candidates: "
+            "Generative SAIL does not accept intent candidates: "
             + ", ".join(forbidden)
         )

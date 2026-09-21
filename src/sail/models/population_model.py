@@ -176,7 +176,7 @@ class PopulationModel(nn.Module):
         """Encode a completed support interaction including observed intent."""
         return self._encode(input_ids, attention_mask, **model_inputs)
 
-    def freeze_for_cusp(self) -> None:
+    def freeze_for_sail(self) -> None:
         """Freeze every population parameter and switch to evaluation mode."""
         self.eval()
         for parameter in self.parameters():

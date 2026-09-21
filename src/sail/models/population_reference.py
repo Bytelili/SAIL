@@ -1,4 +1,4 @@
-"""Compatible multimodal Population reference for CUSP support evidence."""
+"""Compatible multimodal Population reference for SAIL support evidence."""
 
 from __future__ import annotations
 

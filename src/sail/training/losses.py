@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor
 
-from cusp.models.posterior import PosteriorState
+from sail.models.posterior import PosteriorState
 
 
 @dataclass
